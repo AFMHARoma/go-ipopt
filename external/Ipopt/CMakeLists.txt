@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(SET CMP0075 NEW)
-project(IpOpt)
+project(IpOpt CXX)
 
 # FUNNY_LAPACK_FINT
 
@@ -23,7 +23,6 @@ option(COIN_USE_FAST_CODE            "Use intensive optimization flags" ON)
 option(COIN_COMPILE_WARNINGS         "Activate a set of warning options" OFF)
 option(COIN_COMPILE_CXX11            "Activate C++11 compilation" ON)
 option(COIN_TESTS_DISABLE_TIMEOUT    "Disable the timeout of the tests" OFF)
-option(COIN_ENABLE_DOXYGEN           "Enable the build of doxygen documentation" OFF)
 
 option(USE_PROCESSOR_EXTENSIONS      "Use sse / mmx / avx extensions during compilation" OFF)
 option(COIN_ENABLE_COMPAT            "Enable libc compatibility" OFF)   # Do not compile if ON
@@ -475,7 +474,6 @@ check_symbol_exists(gettimeofday  sys/time.h HAVE_GETTIMEOFDAY)
 check_function_exists(dran48     HAVE_DRAND48)
 check_function_exists(rand       HAVE_RAND)
 check_function_exists(snprintf   HAVE_SNPRINTF)
-check_function_exists(std::rand  HAVE_STD__RAND)
 check_function_exists(va_copy    HAVE_VA_COPY)
 check_function_exists(vsnprintf  HAVE_VSNPRINTF)
 check_function_exists(_snprintf  HAVE__SNPRINTF)
@@ -492,6 +490,8 @@ if (WIN32)
     set(HAVE__VSNPRINTF 1)
     set(HAVE_VA_COPY    1)
 endif ()
+
+set(HAVE_STD__RAND 1)
 
 if (COIN_USE_FAST_CODE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer ")
@@ -521,4 +521,4 @@ endif ()
 # HSL Management
 #
 add_definitions(-DCOINHSL_HAS_METIS)
-add_subdirectory(Ipopt)
+add_subdirectory(src)
