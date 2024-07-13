@@ -27,11 +27,4 @@
 /* Define to the C type corresponding to Fortran INTEGER */
 #define FORTRAN_INTEGER_TYPE @FORTRAN_INTEGER_TYPE@
 
-
-#define IPOPT_BLAS_FUNC(name,NAME)    F77_FUNC(name,NAME)
-#define IPOPT_LAPACK_FUNC(name,NAME)  F77_FUNC(name,NAME)
-#define IPOPT_PARDISO_FUNC(name,NAME) F77_FUNC(name,NAME)
-#define IPOPT_WSMP_FUNC(name,NAME)    F77_FUNC(name,NAME)
-#define IPOPT_WSMP_FUNC_(name,NAME)   F77_FUNC_(name,NAME)
-
 #endif

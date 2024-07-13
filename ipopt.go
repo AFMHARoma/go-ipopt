@@ -10,9 +10,9 @@ package ipopt
 #cgo darwin CXXFLAGS: -I ./lib -std=gnu++14
 #cgo darwin,arm CXXFLAGS: -I ./lib -std=gnu++14
 #cgo windows CXXFLAGS: -I ./lib -std=c++14
-#cgo linux LDFLAGS: -L ./lib/linux  -Wl,--start-group -lstdc++ -lproj -ldl -lm -lcipopt -Wl,--end-group
-#cgo darwin LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin  -lproj -lcipopt -lm
-#cgo darwin,arm LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin_arm  -lproj  -lcipopt -lm
-#cgo windows LDFLAGS: -L ./lib/windows -lproj -lcipopt -fPIC
+#cgo linux LDFLAGS: -L ./lib/linux  -Wl,--start-group -lstdc++ -lipopt -llapack -lblas -lma27 -lmetis -ldl -lm -lcipopt -Wl,--end-group
+#cgo darwin LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin -lipopt -lcipopt -llapack -lblas -lma27 -lmetis -lm
+#cgo darwin,arm LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin_arm  -lipopt  -llapack -lblas -lma27 -lmetis -lcipopt -lm
+#cgo windows LDFLAGS: -L ./lib/windows -lipopt -llapack -lblas -lma27 -lmetis -lcipopt -fPIC
 */
 import "C"

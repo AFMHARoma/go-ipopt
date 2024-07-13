@@ -7,7 +7,6 @@ project(IpOpt CXX)
 #undef HAVE_MPI_INITIALIZED - Define to 1 if you have the `MPI_Initialized' function.
 
 option(COIN_ENABLE_READLINE "Enable the use of the readline library" OFF)
-option(IPOPT_HAS_HSL                    "Enable HSL interface"  OFF)
 
 set(COIN_IPOPT_CHECKLEVEL "0" CACHE STRING "The debug sanity check level of IpOpt (0 if no test)")
 set(COIN_IPOPT_VERBOSITY  "0" CACHE STRING "The debug verbosity level of IpOpt (0 if no output)")
@@ -47,11 +46,6 @@ mark_as_advanced(ENABLE_SHARED_LIBRARIES
         COIN_IPOPT_VERBOSITY
         USE_PROCESSOR_EXTENSIONS
         COIN_COVERAGE_CTEST_LABEL)
-
-# Set paths for binary and library generation inside the build directory:
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -490,8 +484,13 @@ if (WIN32)
     set(HAVE__VSNPRINTF 1)
     set(HAVE_VA_COPY    1)
 endif ()
+set(IPOPT_HAS_LAPACK 1)
+set(IPOPT_HAS_HSL 1)
 
-set(HAVE_STD__RAND 1)
+if(COIN_COMPILE_CXX11)
+  message(STATUS "C++11 support enabled. Assuming we have std::rand")
+  set(HAVE_STD__RAND 1)
+endif()
 
 if (COIN_USE_FAST_CODE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fomit-frame-pointer ")

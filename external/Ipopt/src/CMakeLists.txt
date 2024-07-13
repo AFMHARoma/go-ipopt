@@ -17,7 +17,7 @@ mark_as_advanced(IPOPT_VERSION_MAJOR
         IPOPT_VERSION
         IPOPT_SVN_REV)
 
-add_definitions(-DIPOPT_BUILD)
+add_definitions(-DIPOPTLIB_BUILD)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/config.h.in       ${CMAKE_CURRENT_BINARY_DIR}/Interfaces/config.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Interfaces/config_ipopt.h.in ${CMAKE_CURRENT_BINARY_DIR}/Interfaces/config_ipopt.h)
@@ -184,8 +184,6 @@ set (IPOPT_SRC_LIST ${IPOPT_SRC_ALGORITHM_LIST}
         ${IPOPT_SRC_INTERFACES_LIST}
         ${IPOPT_SRC_LINALG_LIST}
         ${IPOPT_SRC_LINALG_TMATRICES})
-
-message( ${IPOPT_SRC_LIST})
 
 if (IPOPT_ENABLE_INEXACT)
     set(IPOPT_SRC_LIST ${IPOPT_SRC_LIST}

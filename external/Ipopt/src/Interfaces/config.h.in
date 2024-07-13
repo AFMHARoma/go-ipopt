@@ -6,20 +6,11 @@
 /* Define to be the name of C-function for Inf check */
 #define COIN_C_FINITE @COIN_C_FINITE@
 
-/* Define to 1 if the ASL package is available */
-#cmakedefine COIN_HAS_ASL
-
-/* If defined, the BLAS Library is available. */
-#cmakedefine COIN_HAS_BLAS
-
-/* Define to 1 if the HSL package is available */
-#cmakedefine COIN_HAS_HSL
-
 /* If defined, the LAPACK Library is available. */
-#cmakedefine COIN_HAS_LAPACK
+#cmakedefine IPOPT_HAS_LAPACK
 
-/* Define to 1 if the Mumps package is available */
-#cmakedefine COIN_HAS_MUMPS
+/* Define to 1 if HSL is available. */
+#cmakedefine IPOPT_HAS_HSL
 
 /* Define to the debug sanity check level (0 is no test) */
 #define COIN_IPOPT_CHECKLEVEL @COIN_IPOPT_CHECKLEVEL@
@@ -231,3 +222,9 @@
 
 /* Version number of package */
 #define VERSION "@VERSION@"
+
+#define IPOPT_BLAS_FUNC(name,NAME)    F77_FUNC(name,NAME)
+#define IPOPT_LAPACK_FUNC(name,NAME)  F77_FUNC(name,NAME)
+#define IPOPT_PARDISO_FUNC(name,NAME) F77_FUNC(name,NAME)
+#define IPOPT_WSMP_FUNC(name,NAME)    F77_FUNC(name,NAME)
+#define IPOPT_WSMP_FUNC_(name,NAME)   F77_FUNC_(name,NAME)
