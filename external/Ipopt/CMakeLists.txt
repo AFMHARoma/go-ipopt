@@ -484,6 +484,7 @@ if (WIN32)
     set(HAVE__VSNPRINTF 1)
     set(HAVE_VA_COPY    1)
 endif ()
+
 set(IPOPT_HAS_LAPACK 1)
 set(IPOPT_HAS_HSL 1)
 set(IPOPT_SINGLE 1)
