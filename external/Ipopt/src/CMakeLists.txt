@@ -113,7 +113,14 @@ set (IPOPT_SRC_ALGORITHM_LINEARSOLVERS_LIST ${CMAKE_CURRENT_SOURCE_DIR}/Algorith
         ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpTripletToCSRConverter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpTSymDependencyDetector.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpTSymLinearSolver.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMa27TSolverInterface.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMa27TSolverInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMa57TSolverInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMa86SolverInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMa97SolverInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMc19TSymScalingMethod.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMa28TDependencyDetector.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpMa77SolverInterface.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Algorithm/LinearSolvers/IpPardisoSolverInterface.cpp)
 
 enable_language(Fortran)
 
@@ -210,15 +217,15 @@ if (WIN32)
 endif ()
 
 if (ENABLE_SHARED_LIBRARIES)
-    add_library(libipopt SHARED ${IPOPT_SRC_LIST})
+    add_library(ipopt SHARED ${IPOPT_SRC_LIST})
 else ()
-    add_library(libipopt STATIC ${IPOPT_SRC_LIST})
-    target_link_libraries(libipopt quadmath)
+    add_library(ipopt STATIC ${IPOPT_SRC_LIST})
+    target_link_libraries(ipopt quadmath)
 endif ()
 if (COIN_COMPILE_LTO)
-    set_target_properties(libipopt PROPERTIES INTERPROCEDURAL_OPTIMIZATION true)
+    set_target_properties(ipopt PROPERTIES INTERPROCEDURAL_OPTIMIZATION true)
 endif ()
 if (NOT WIN32)
-    set_target_properties(libipopt PROPERTIES PREFIX "")
+    set_target_properties(ipopt PROPERTIES PREFIX "")
 endif ()
-set_include_directories(libipopt)
+set_include_directories(ipopt)

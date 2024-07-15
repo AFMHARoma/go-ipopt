@@ -7,6 +7,8 @@
 /* Define to 1 if MA27 is available. */
 #define COINHSL_HAS_MA27 1
 
-#define IPOPT_HSL_FUNC(name,NAME) name
+#define COINHSL_HAS_MA27S 1
+
+#define IPOPT_HSL_FUNC(name,NAME) name ## _
 
 #endif
