@@ -149,7 +149,6 @@ func TestVersion(t *testing.T) {
 
 	problem.AddNumOption("tol", 3.82e-6)
 	problem.AddStrOption("mu_strategy", "adaptive")
-	problem.AddStrOption("output_file", "ipopt.out")
 
 	p.problem = problem
 	p.g_offset[0] = 0.
