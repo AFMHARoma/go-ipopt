@@ -22,19 +22,10 @@ project(MUMPS Fortran C)
 # Options
 ###############################################################################
 
-
-find_package(BLAS)
-if(NOT BLAS_FOUND)
-  message(FATAL_ERROR "BLAS not found")
-endif()
-
-find_package(LAPACK)
-if(NOT LAPACK_FOUND)
-  message(FATAL_ERROR "LAPACK not found")
-endif()
 if (WIN32)
   add_definitions(-DWITHOUT_PTHREAD=1)
 endif ()
+
 # -DWITH_MPI
 option(WITH_MPI "for parallel environment with MPI" OFF)
 if(WITH_MPI)
@@ -50,9 +41,9 @@ if(WITH_MPI)
 endif()
 
 if(intsize64)
-set(intsrc ${CMAKE_CURRENT_SOURCE_DIR}/src/mumps_int_def64_h.in)
+  set(intsrc ${CMAKE_CURRENT_SOURCE_DIR}/src/mumps_int_def64_h.in)
 else()
-set(intsrc ${CMAKE_CURRENT_SOURCE_DIR}/src/mumps_int_def32_h.in)
+  set(intsrc ${CMAKE_CURRENT_SOURCE_DIR}/src/mumps_int_def32_h.in)
 endif()
 configure_file(${intsrc}  ${CMAKE_CURRENT_SOURCE_DIR}/include/mumps_int_def.h COPYONLY)
 
