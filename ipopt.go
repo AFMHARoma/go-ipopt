@@ -12,8 +12,9 @@ package ipopt
 #cgo darwin,arm CXXFLAGS: -I ./lib -std=gnu++14
 #cgo windows CXXFLAGS: -I ./lib -std=c++14
 #cgo linux LDFLAGS: -L ./lib/linux  -Wl,--start-group -lstdc++ -lipopt -llapack -lblas -lma27 -lmetis -ldl -lm -lcipopt -lgfortran -Wl,--end-group
-#cgo darwin LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin -lipopt -lcipopt -llapack -lblas -lma27 -lmetis -lm
-#cgo darwin,arm LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin_arm  -lipopt  -llapack -lblas -lma27 -lmetis -lcipopt -lm
+#cgo darwin LDFLAGS: -L /usr/local/gfortran/lib -Wl,-rpath,/usr/local/gfortran/lib
+#cgo darwin,amd64 LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin -lipopt -lcipopt   -lma27 -lmetis -lm  -framework Accelerate  -lgfortran
+#cgo darwin,arm64 LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin_arm  -lipopt  -lma27 -lmetis -lcipopt -lm  -framework Accelerate  -lgfortran
 #cgo windows LDFLAGS: -L ./lib/windows -lipopt -llapack -lblas -lma27 -lmetis -lcipopt -fPIC
 
 extern bool evalFunc(int n, float *x, bool new_x, float *obj_value,

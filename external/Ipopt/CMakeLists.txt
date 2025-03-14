@@ -222,7 +222,7 @@ set(FORTRAN_INTEGER_TYPE int)
 # Detect name mangling convention used between Fortran and C
 #-----------------------------------------------------------------------------
 
-if (CMAKE_Fortran_COMPILER)
+if (false)
     enable_language(Fortran)
 
     include(FortranCInterface)
@@ -232,14 +232,11 @@ if (CMAKE_Fortran_COMPILER)
             SYMBOL_NAMESPACE "F77_")
 
     file(STRINGS ${CMAKE_BINARY_DIR}/F77Mangle.h CONTENTS REGEX "F77_GLOBAL\\(.*,.*\\) +(.*)")
+    message(${CMAKE_BINARY_DIR}/F77Mangle.h)
+    message(${CONTENTS})
     string(REGEX MATCH "F77_GLOBAL\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
     set(F77_FUNC         "F77_FUNC(name,NAME) ${CMAKE_MATCH_1}")
     set(COIN_LAPACK_FUNC "COIN_LAPACK_FUNC(name,NAME) ${CMAKE_MATCH_1}")
-
-    file(STRINGS ${CMAKE_BINARY_DIR}/F77Mangle.h CONTENTS REGEX "F77_GLOBAL_\\(.*,.*\\) +(.*)")
-    string(REGEX MATCH "F77_GLOBAL_\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
-    set(F77_FUNC_         "F77_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
-    set(COIN_LAPACK_FUNC_ "COIN_LAPACK_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 else ()
     set(F77_FUNC          "F77_FUNC(name,NAME)  name##_")
     set(F77_FUNC_         "F77_FUNC_(name,NAME) name##__")
