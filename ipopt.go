@@ -222,6 +222,7 @@ func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []floa
 	toCopyFloatArray(cmultxL, multxL)
 	toCopyFloatArray(cmultxU, multxU)
 	toCopyFloatArray(cobjVal, objVal)
+	toCopyFloatArray(cX, x)
 
 	if ret == IPOPT_SOLVE_SUCCEEDED {
 		return objVal, nil
