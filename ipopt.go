@@ -113,7 +113,7 @@ type problemCallback struct {
 }
 
 type Problem struct {
-	Inner *innerProblem
+	inner *innerProblem
 	opt   *ProblemOptions
 }
 
@@ -160,7 +160,7 @@ func NewProblem(opt ProblemOptions) (*Problem, error) {
 		evalH:    opt.EvalH,
 	}
 
-	g := &Problem{Inner: &innerProblem{
+	g := &Problem{inner: &innerProblem{
 		problem: problem, cb: cb,
 	}, opt: &opt}
 
@@ -170,24 +170,24 @@ func NewProblem(opt ProblemOptions) (*Problem, error) {
 func (p *Problem) AddStrOption(param string, value string) {
 	cparam := C.CString(param)
 	cvalue := C.CString(value)
-	C.ipopt_problem_add_str_option(p.Inner.problem, cparam, cvalue)
+	C.ipopt_problem_add_str_option(p.inner.problem, cparam, cvalue)
 	C.free(unsafe.Pointer(cparam))
 	C.free(unsafe.Pointer(cvalue))
 }
 
 func (p *Problem) AddIntOption(param string, value int) {
 	cparam := C.CString(param)
-	C.ipopt_problem_add_int_option(p.Inner.problem, cparam, C.int(value))
+	C.ipopt_problem_add_int_option(p.inner.problem, cparam, C.int(value))
 	C.free(unsafe.Pointer(cparam))
 }
 
 func (p *Problem) AddNumOption(param string, value float32) {
 	cparam := C.CString(param)
-	C.ipopt_problem_add_num_option(p.Inner.problem, cparam, C.float(value))
+	C.ipopt_problem_add_num_option(p.inner.problem, cparam, C.float(value))
 	C.free(unsafe.Pointer(cparam))
 }
 
-func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []float32, multxL []float32, multxU []float32) ([]float32, error) {
+func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []float32, multxL []float32, multxU []float32, needFreeProblem bool) ([]float32, error) {
 	cX := toCFloatArray(x)
 	cg := toCFloatArray(g)
 
@@ -206,9 +206,9 @@ func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []floa
 	cmultxL := toCFloatArray(multxL)
 	cmultxU := toCFloatArray(multxU)
 
-	userData := (*C.char)(unsafe.Pointer(p.Inner.cb))
+	userData := (*C.char)(unsafe.Pointer(p.inner.cb))
 
-	ret := (int)(C.ipopt_problem_solve(p.Inner.problem,
+	ret := (int)(C.ipopt_problem_solve(p.inner.problem,
 		ccX,
 		ccg,
 		(*C.float)(&cobjVal[0]),
@@ -222,6 +222,10 @@ func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []floa
 	toCopyFloatArray(cmultxU, multxU)
 	toCopyFloatArray(cobjVal, objVal)
 	toCopyFloatArray(cX, x)
+
+	if needFreeProblem {
+		p.inner.free()
+	}
 
 	if ret == IPOPT_SOLVE_SUCCEEDED {
 		return objVal, nil
@@ -274,7 +278,7 @@ func resultStatus(code int) error {
 	return errors.New(s)
 }
 
-func (p *innerProblem) Free() {
+func (p *innerProblem) free() {
 	C.ipopt_problem_free(p.problem)
 	p.problem = nil
 }
