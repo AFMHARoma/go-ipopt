@@ -274,7 +274,7 @@ func resultStatus(code int) error {
 	return errors.New(s)
 }
 
-func (p *innerProblem) free() {
+func (p *innerProblem) Free() {
 	C.ipopt_problem_free(p.problem)
 	p.problem = nil
 }
