@@ -60,7 +60,6 @@ bool ipopt_eval_h_func_go(int n, float *x, bool new_x, float obj_factor, int m,
 import "C"
 import (
 	"errors"
-	"runtime"
 	"unsafe"
 )
 
@@ -114,7 +113,7 @@ type problemCallback struct {
 }
 
 type Problem struct {
-	inner *innerProblem
+	Inner *innerProblem
 	opt   *ProblemOptions
 }
 
@@ -161,30 +160,30 @@ func NewProblem(opt ProblemOptions) (*Problem, error) {
 		evalH:    opt.EvalH,
 	}
 
-	g := &Problem{inner: &innerProblem{
+	g := &Problem{Inner: &innerProblem{
 		problem: problem, cb: cb,
 	}, opt: &opt}
-	runtime.SetFinalizer(g.inner, (*innerProblem).free)
+
 	return g, nil
 }
 
 func (p *Problem) AddStrOption(param string, value string) {
 	cparam := C.CString(param)
 	cvalue := C.CString(value)
-	C.ipopt_problem_add_str_option(p.inner.problem, cparam, cvalue)
+	C.ipopt_problem_add_str_option(p.Inner.problem, cparam, cvalue)
 	C.free(unsafe.Pointer(cparam))
 	C.free(unsafe.Pointer(cvalue))
 }
 
 func (p *Problem) AddIntOption(param string, value int) {
 	cparam := C.CString(param)
-	C.ipopt_problem_add_int_option(p.inner.problem, cparam, C.int(value))
+	C.ipopt_problem_add_int_option(p.Inner.problem, cparam, C.int(value))
 	C.free(unsafe.Pointer(cparam))
 }
 
 func (p *Problem) AddNumOption(param string, value float32) {
 	cparam := C.CString(param)
-	C.ipopt_problem_add_num_option(p.inner.problem, cparam, C.float(value))
+	C.ipopt_problem_add_num_option(p.Inner.problem, cparam, C.float(value))
 	C.free(unsafe.Pointer(cparam))
 }
 
@@ -207,9 +206,9 @@ func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []floa
 	cmultxL := toCFloatArray(multxL)
 	cmultxU := toCFloatArray(multxU)
 
-	userData := (*C.char)(unsafe.Pointer(p.inner.cb))
+	userData := (*C.char)(unsafe.Pointer(p.Inner.cb))
 
-	ret := (int)(C.ipopt_problem_solve(p.inner.problem,
+	ret := (int)(C.ipopt_problem_solve(p.Inner.problem,
 		ccX,
 		ccg,
 		(*C.float)(&cobjVal[0]),
