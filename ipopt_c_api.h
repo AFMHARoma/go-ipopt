@@ -35,25 +35,25 @@ enum ipopt_return_status {
   internal_error = -199
 };
 
-typedef bool (*eval_f_cb)(int n, float *x, bool new_x, float *obj_value,
+typedef bool (*eval_f_cb)(int n, double *x, bool new_x, double *obj_value,
                           void *user_data);
-typedef bool (*eval_grad_f_cb)(int n, float *x, bool new_x, float *grad_f,
+typedef bool (*eval_grad_f_cb)(int n, double *x, bool new_x, double *grad_f,
                                void *user_data);
 
-typedef bool (*eval_g_cb)(int n, float *x, bool new_x, int m, float *g,
+typedef bool (*eval_g_cb)(int n, double *x, bool new_x, int m, double *g,
                           void *user_data);
 
-typedef bool (*eval_jac_g_cb)(int n, float *x, bool new_x, int m, int nele_jac,
-                              int *iRow, int *jCol, float *values,
+typedef bool (*eval_jac_g_cb)(int n, double *x, bool new_x, int m, int nele_jac,
+                              int *iRow, int *jCol, double *values,
                               void *user_data);
-typedef bool (*eval_h_cb)(int n, float *x, bool new_x, float obj_factor, int m,
-                          float *lambda, bool new_lambda, int nele_hess,
-                          int *iRow, int *jCol, float *values, void *user_data);
+typedef bool (*eval_h_cb)(int n, double *x, bool new_x, double obj_factor, int m,
+                          double *lambda, bool new_lambda, int nele_hess,
+                          int *iRow, int *jCol, double *values, void *user_data);
 
 typedef struct _ipopt_problem_t ipopt_problem_t;
 
 IPOPTCAPICALL ipopt_problem_t *
-ipopt_problem_create(int n, float *xL, float *xU, int m, float *gl, float *gu,
+ipopt_problem_create(int n, double *xL, double *xU, int m, double *gl, double *gu,
                      int nnzj, int nnzh, eval_f_cb eval_f,
                      eval_grad_f_cb eval_grad_f, eval_g_cb eval_g,
                      eval_jac_g_cb eval_jac_g, eval_h_cb eval_h);
@@ -69,8 +69,8 @@ IPOPTCAPICALL void ipopt_problem_set_problem_scaling(ipopt_problem_t *p,
                                                      float *x_scaling,
                                                      float *g_scaling);
 IPOPTCAPICALL enum ipopt_return_status
-ipopt_problem_solve(ipopt_problem_t *p, float *x, float *g, float *obj_val,
-                    float *mult_g, float *mult_x_L, float *mult_x_U,
+ipopt_problem_solve(ipopt_problem_t *p, double *x, double *g, double *obj_val,
+                    double *mult_g, double *mult_x_L, double *mult_x_U,
                     char *user_data);
 IPOPTCAPICALL void ipopt_problem_free(ipopt_problem_t *p);
 

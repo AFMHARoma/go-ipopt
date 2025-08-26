@@ -484,7 +484,7 @@ endif ()
 
 set(IPOPT_HAS_LAPACK 1)
 set(IPOPT_HAS_HSL 1)
-set(IPOPT_SINGLE 1)
+# set(IPOPT_SINGLE 1)
 
 if(COIN_COMPILE_CXX11)
   message(STATUS "C++11 support enabled. Assuming we have std::rand")

@@ -86,15 +86,15 @@ const (
 	IPOPT_INTERNAL_ERROR                     = int(C.internal_error)
 )
 
-type EvalFunc func(x []float32, newX bool, objValue []float32) bool
-type EvalGradFunc func(x []float32, newX bool, grad []float32) bool
-type EvalGFunc func(x []float32, newX bool, m int, g []float32) bool
-type EvalJacGFunc func(x []float32, newX bool, m int, jac [2][]int32, values []float32) bool
-type EvalHFunc func(x []float32, newX bool, objFactor float32, m int, lambda []float32, newLambda bool, hess [2][]int32, values []float32) bool
+type EvalFunc func(x []float64, newX bool, objValue *float64) bool
+type EvalGradFunc func(x []float64, newX bool, grad []float64) bool
+type EvalGFunc func(x []float64, newX bool, m int, g []float64) bool
+type EvalJacGFunc func(x []float64, newX bool, m int, jac [2][]int32, values []float64) bool
+type EvalHFunc func(x []float64, newX bool, objFactor float64, m int, lambda []float64, newLambda bool, hess [2][]int32, values []float64) bool
 
 type ProblemOptions struct {
-	Variables              [2][]float32
-	Constraints            [2][]float32
+	Variables              [2][]float64
+	Constraints            [2][]float64
 	NumConstraintJacobian  int
 	NumHessianOfLagrangian int
 	Eval                   EvalFunc
@@ -187,15 +187,15 @@ func (p *Problem) AddNumOption(param string, value float32) {
 	C.free(unsafe.Pointer(cparam))
 }
 
-func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []float32, multxL []float32, multxU []float32, needFreeProblem bool) ([]float32, error) {
+func (p *Problem) Solve(x []float64, g []float64, objVal []float64, multG []float64, multxL []float64, multxU []float64, needFreeProblem bool) ([]float64, error) {
 	cX := toCFloatArray(x)
 	cg := toCFloatArray(g)
 
-	ccX := (*C.float)(&cX[0])
+	ccX := (*C.double)(&cX[0])
 
-	var ccg *C.float
+	var ccg *C.double
 	if len(cg) > 0 {
-		ccg = (*C.float)(&cg[0])
+		ccg = (*C.double)(&cg[0])
 	} else {
 		ccg = nil
 	}
@@ -211,10 +211,10 @@ func (p *Problem) Solve(x []float32, g []float32, objVal []float32, multG []floa
 	ret := (int)(C.ipopt_problem_solve(p.inner.problem,
 		ccX,
 		ccg,
-		(*C.float)(&cobjVal[0]),
-		(*C.float)(&cmultG[0]),
-		(*C.float)(&cmultxL[0]),
-		(*C.float)(&cmultxU[0]),
+		(*C.double)(&cobjVal[0]),
+		(*C.double)(&cmultG[0]),
+		(*C.double)(&cmultxL[0]),
+		(*C.double)(&cmultxU[0]),
 		userData))
 
 	toCopyFloatArray(cmultG, multG)
@@ -283,17 +283,17 @@ func (p *innerProblem) free() {
 	p.problem = nil
 }
 
-func toCFloatArray(x []float32) []C.float {
-	v := make([]C.float, len(x))
+func toCFloatArray(x []float64) []C.double {
+	v := make([]C.double, len(x))
 	for i := 0; i < len(x); i++ {
-		v[i] = (C.float)(x[i])
+		v[i] = (C.double)(x[i])
 	}
 	return v
 }
 
-func toCopyFloatArray(srv []C.float, x []float32) []float32 {
+func toCopyFloatArray(srv []C.double, x []float64) []float64 {
 	for i := 0; i < len(x); i++ {
-		x[i] = (float32)(srv[i])
+		x[i] = (float64)(srv[i])
 	}
 	return x
 }
