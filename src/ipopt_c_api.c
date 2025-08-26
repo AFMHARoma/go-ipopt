@@ -7,7 +7,7 @@ struct _ipopt_problem_t {
 };
 
 ipopt_problem_t *
-ipopt_problem_create(int n, float *xL, float *xU, int m, float *gl, float *gu,
+ipopt_problem_create(int n, double *xL, double *xU, double m, double *gl, double *gu,
                      int nnzj, int nnzh, eval_f_cb eval_f,
                      eval_grad_f_cb eval_grad_f, eval_g_cb eval_g,
                      eval_jac_g_cb eval_jac_g, eval_h_cb eval_h) {
@@ -34,23 +34,23 @@ void ipopt_problem_add_int_option(ipopt_problem_t *p, const char *param,
 }
 
 void ipopt_problem_add_num_option(ipopt_problem_t *p, const char *param,
-                                  float value) {
+                                  double value) {
   if (p->problem != NULL) {
     AddIpoptNumOption(p->problem, (char *)param, value);
   }
 }
 
-void ipopt_problem_set_problem_scaling(ipopt_problem_t *p, float obj_scaling,
-                                       float *x_scaling, float *g_scaling) {
+void ipopt_problem_set_problem_scaling(ipopt_problem_t *p, double obj_scaling,
+                                       double *x_scaling, double *g_scaling) {
   if (p->problem != NULL) {
     SetIpoptProblemScaling(p->problem, obj_scaling, x_scaling, g_scaling);
   }
 }
 
-enum ipopt_return_status ipopt_problem_solve(ipopt_problem_t *p, float *x,
-                                             float *g, float *obj_val,
-                                             float *mult_g, float *mult_x_L,
-                                             float *mult_x_U, char *user_data) {
+enum ipopt_return_status ipopt_problem_solve(ipopt_problem_t *p, double *x,
+                                             double *g, double *obj_val,
+                                             double *mult_g, double *mult_x_L,
+                                             double *mult_x_U, char *user_data) {
   if (p->problem != NULL) {
     enum ApplicationReturnStatus ret = IpoptSolve(
         p->problem, x, g, obj_val, mult_g, mult_x_L, mult_x_U, user_data);

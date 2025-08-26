@@ -9,8 +9,6 @@ import (
 	"testing"
 )
 
-var defaultSettings = fd.Settings{Step: 0.0001}
-
 // ComputeHessian численно оценивает гессиан функции f в точке x.
 func ComputeHessian(f func(x []float64) float64, x []float64) *mat.SymDense {
 	n := len(x)                         // Размерность входного вектора
@@ -20,12 +18,12 @@ func ComputeHessian(f func(x []float64) float64, x []float64) *mat.SymDense {
 	for i := range n {
 		// Для каждой переменной вычисляем частные производные (градиент)
 		gradFunc := func(xi []float64) float64 {
-			g := fd.Gradient(nil, f, xi, &defaultSettings) // Вычисляем градиент функции f по x
-			return g[i]                                    // Возвращаем i-ю компоненту градиента
+			g := fd.Gradient(nil, f, xi, nil) // Вычисляем градиент функции f по x
+			return g[i]                       // Возвращаем i-ю компоненту градиента
 		}
 
 		// Вычисляем вторую производную (гессиан) для этой компоненты
-		secondGrad := fd.Gradient(nil, gradFunc, x, &defaultSettings)
+		secondGrad := fd.Gradient(nil, gradFunc, x, nil)
 
 		// Записываем результаты в матрицу гессиана
 		for j := range n {
@@ -141,7 +139,7 @@ func (p *MyProblem) evalGradF(x []float64, _ bool, grad []float64) bool {
 		nil,
 		p.targetFunc,
 		x,
-		&defaultSettings,
+		nil,
 	)
 
 	for i := 0; i < len(grad); i++ {
@@ -231,8 +229,8 @@ func (p *MyProblem) evalH(
 
 func TestVersion(t *testing.T) {
 	n := 4
-	x_L := make([]float32, n)
-	x_U := make([]float32, n)
+	x_L := make([]float64, n)
+	x_U := make([]float64, n)
 
 	for i := 0; i < n; i++ {
 		x_L[i] = 1.0
@@ -240,8 +238,8 @@ func TestVersion(t *testing.T) {
 	}
 
 	m := 2
-	g_L := make([]float32, m)
-	g_U := make([]float32, m)
+	g_L := make([]float64, m)
+	g_U := make([]float64, m)
 
 	g_L[0] = 25
 	g_U[0] = 2e19
@@ -254,8 +252,8 @@ func TestVersion(t *testing.T) {
 	p := &MyProblem{}
 
 	opt := ProblemOptions{
-		Variables:              [2][]float32{x_L, x_U},
-		Constraints:            [2][]float32{g_L, g_U},
+		Variables:              [2][]float64{x_L, x_U},
+		Constraints:            [2][]float64{g_L, g_U},
 		NumConstraintJacobian:  nele_jac,
 		NumHessianOfLagrangian: nele_hess,
 		Eval:                   p.evalF,
@@ -275,17 +273,17 @@ func TestVersion(t *testing.T) {
 
 	p.problem = problem
 
-	x := make([]float32, n)
+	x := make([]float64, n)
 	x[0] = 1.0
 	x[1] = 5.0
 	x[2] = 5.0
 	x[3] = 1.0
 
-	mult_g := make([]float32, m)
-	mult_x_L := make([]float32, n)
-	mult_x_U := make([]float32, n)
+	mult_g := make([]float64, m)
+	mult_x_L := make([]float64, n)
+	mult_x_U := make([]float64, n)
 
-	objVal := []float32{0}
+	objVal := []float64{0}
 
 	objVal, status := p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U, true)
 	if status == nil {
