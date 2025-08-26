@@ -2,36 +2,172 @@ package ipopt
 
 import (
 	"fmt"
+
+	"gonum.org/v1/gonum/diff/fd"
+	"gonum.org/v1/gonum/mat"
+
 	"testing"
 )
 
+var defaultSettings = fd.Settings{Step: 0.0001}
+
+// ComputeHessian численно оценивает гессиан функции f в точке x.
+func ComputeHessian(f func(x []float64) float64, x []float64) *mat.SymDense {
+	n := len(x)                         // Размерность входного вектора
+	hessianData := make([]float64, n*n) // Массив для хранения значений гессиана
+
+	// Обрабатываем каждую переменную для вычисления вторых производных
+	for i := range n {
+		// Для каждой переменной вычисляем частные производные (градиент)
+		gradFunc := func(xi []float64) float64 {
+			g := fd.Gradient(nil, f, xi, &defaultSettings) // Вычисляем градиент функции f по x
+			return g[i]                                    // Возвращаем i-ю компоненту градиента
+		}
+
+		// Вычисляем вторую производную (гессиан) для этой компоненты
+		secondGrad := fd.Gradient(nil, gradFunc, x, &defaultSettings)
+
+		// Записываем результаты в матрицу гессиана
+		for j := range n {
+			hessianData[i*n+j] = secondGrad[j] // Записываем в ячейку гессиана
+		}
+	}
+
+	// Создаём симметричную матрицу гессиана
+	return mat.NewSymDense(n, hessianData)
+}
+
+// ComputeLagrangianHessian строит гессиан лагранжиана с учётом весов objFactor и множителей lambda.
+func ComputeLagrangianHessian(
+	objFunc func(x []float64) float64,
+	constrFunc func(y, x []float64),
+	objFactor float64,
+	lambda []float64,
+	x []float64,
+) *mat.SymDense {
+	n := len(x)
+	hessianData := make([]float64, n*n)
+
+	// Вычисляем гессиан целевой функции
+	if objFactor != 0 {
+		hessObj := ComputeHessian(objFunc, x)
+
+		for i := 0; i < n; i++ {
+			for j := 0; j <= i; j++ {
+				v := hessObj.At(i, j) * objFactor
+
+				hessianData[i*n+j] += v
+
+				if i != j {
+					hessianData[j*n+i] += v
+				}
+			}
+		}
+	}
+
+	// Для ограничений — через градиенты constraintFunc
+	if lambda != nil {
+		m := len(lambda)
+
+		for k := 0; k < m; k++ {
+			constraintGradFunc := func(xi []float64) float64 {
+				y := make([]float64, m)
+				constrFunc(y, xi)
+
+				return y[k]
+			}
+			hessGk := ComputeHessian(constraintGradFunc, x)
+
+			for i := 0; i < n; i++ {
+				for j := 0; j <= i; j++ {
+					v := hessGk.At(i, j) * lambda[k]
+
+					hessianData[i*n+j] += v
+
+					if i != j {
+						hessianData[j*n+i] += v
+					}
+				}
+			}
+		}
+	}
+
+	return mat.NewSymDense(n, hessianData)
+}
+
+// ExtractUpperTriangle извлекает элементы верхнего треугольника симметричной матрицы.
+func ExtractUpperTriangle(sym *mat.SymDense) []float64 {
+	n := sym.SymmetricDim()
+
+	result := make([]float64, 0, n*(n+1)/2)
+
+	for i := 0; i < n; i++ {
+		for j := i; j < n; j++ {
+			result = append(result, sym.At(i, j))
+		}
+	}
+
+	return result
+}
+
+func ConvFloat32ArrToFloat64(x []float32) []float64 {
+	newArray := make([]float64, len(x))
+
+	for i, r := range x {
+		newArray[i] = float64(r)
+	}
+
+	return newArray
+}
+
 type MyProblem struct {
-	g_offset [2]float32
-	problem  *Problem
+	problem *Problem
 }
 
-func (p *MyProblem) eval_f(x []float32, _ bool, objValue []float32) bool {
-	objValue[0] = x[0]*x[3]*(x[0]+x[1]+x[2]) + x[2]
-	return true
+func (p *MyProblem) targetFunc(x []float64) float64 {
+	return x[0]*x[3]*(x[0]+x[1]+x[2]) + x[2]
 }
 
-func (p *MyProblem) eval_grad_f(x []float32, _ bool, grad []float32) bool {
-	grad[0] = x[0]*x[3] + x[3]*(x[0]+x[1]+x[2])
-	grad[1] = x[0] * x[3]
-	grad[2] = x[0]*x[3] + 1
-	grad[3] = x[0] * (x[0] + x[1] + x[2])
-	return true
-}
+func (p *MyProblem) evalF(x []float64, _ bool, objValue *float64) bool {
+	res := p.targetFunc(x)
 
-func (p *MyProblem) eval_g(x []float32, _ bool, _ int, g []float32) bool {
-
-	g[0] = x[0]*x[1]*x[2]*x[3] + p.g_offset[0]
-	g[1] = x[0]*x[0] + x[1]*x[1] + x[2]*x[2] + x[3]*x[3] + p.g_offset[1]
+	*objValue = res
 
 	return true
 }
 
-func (p *MyProblem) eval_jac_g(x []float32, _ bool, _ int, jac [2][]int32, values []float32) bool {
+func (p *MyProblem) evalGradF(x []float64, _ bool, grad []float64) bool {
+	new_grad := fd.Gradient(
+		nil,
+		p.targetFunc,
+		x,
+		&defaultSettings,
+	)
+
+	for i := 0; i < len(grad); i++ {
+		grad[i] = new_grad[i]
+	}
+
+	return true
+}
+
+func (p *MyProblem) evalGVector(y, x []float64) {
+	y[0] = x[0] * x[1] * x[2] * x[3]
+	y[1] = x[0]*x[0] + x[1]*x[1] + x[2]*x[2] + x[3]*x[3]
+}
+
+// evalG реализует интерфейс IPOPT: значения ограничений g(x).
+func (p *MyProblem) evalG(x []float64, _ bool, _ int, g []float64) bool {
+	g[0] = x[0] * x[1] * x[2] * x[3]
+	g[1] = x[0]*x[0] + x[1]*x[1] + x[2]*x[2] + x[3]*x[3]
+
+	return true
+}
+
+// evalJacG реализует интерфейс IPOPT: якобиан ограничений (структура и значения).
+func (p *MyProblem) evalJacG(x []float64, _ bool, _ int, jac [2][]int32, values []float64) bool {
+	dense := mat.NewDense(2, 4, nil)
+
 	if values == nil {
 		jac[0][0] = 0
 		jac[1][0] = 0
@@ -50,20 +186,28 @@ func (p *MyProblem) eval_jac_g(x []float32, _ bool, _ int, jac [2][]int32, value
 		jac[0][7] = 1
 		jac[1][7] = 3
 	} else {
-		values[0] = x[1] * x[2] * x[3] /* 0,0 */
-		values[1] = x[0] * x[2] * x[3] /* 0,1 */
-		values[2] = x[0] * x[1] * x[3] /* 0,2 */
-		values[3] = x[0] * x[1] * x[2] /* 0,3 */
+		fd.Jacobian(dense, p.evalGVector, x, nil)
+		matrix := dense.RawMatrix().Data
 
-		values[4] = 2 * x[0] /* 1,0 */
-		values[5] = 2 * x[1] /* 1,1 */
-		values[6] = 2 * x[2] /* 1,2 */
-		values[7] = 2 * x[3] /* 1,3 */
+		for i := 0; i < len(matrix); i++ {
+			values[i] = matrix[i]
+		}
 	}
+
 	return true
 }
 
-func (p *MyProblem) eval_h(x []float32, _ bool, objFactor float32, _ int, lambda []float32, _ bool, hess [2][]int32, values []float32) bool {
+// evalH реализует интерфейс IPOPT: гессиан лагранжиана (структура и значения).
+func (p *MyProblem) evalH(
+	x []float64,
+	_ bool,
+	objFactor float64,
+	_ int,
+	lambda []float64,
+	_ bool,
+	hess [2][]int32,
+	values []float64,
+) bool {
 	if values == nil {
 		idx := 0
 		for row := 0; row < 4; row++ {
@@ -73,39 +217,15 @@ func (p *MyProblem) eval_h(x []float32, _ bool, objFactor float32, _ int, lambda
 				idx++
 			}
 		}
-
 	} else {
-		values[0] = objFactor * (2 * x[3]) /* 0,0 */
+		hess := ComputeLagrangianHessian(p.targetFunc, p.evalGVector, objFactor, lambda, x)
+		matrix := ExtractUpperTriangle(hess)
 
-		values[1] = objFactor * (x[3]) /* 1,0 */
-		values[2] = 0                  /* 1,1 */
-
-		values[3] = objFactor * (x[3]) /* 2,0 */
-		values[4] = 0                  /* 2,1 */
-		values[5] = 0                  /* 2,2 */
-
-		values[6] = objFactor * (2*x[0] + x[1] + x[2]) /* 3,0 */
-		values[7] = objFactor * (x[0])                 /* 3,1 */
-		values[8] = objFactor * (x[0])                 /* 3,2 */
-		values[9] = 0                                  /* 3,3 */
-
-		values[1] += lambda[0] * (x[2] * x[3]) /* 1,0 */
-
-		values[3] += lambda[0] * (x[1] * x[3]) /* 2,0 */
-		values[4] += lambda[0] * (x[0] * x[3]) /* 2,1 */
-
-		values[6] += lambda[0] * (x[1] * x[2]) /* 3,0 */
-		values[7] += lambda[0] * (x[0] * x[2]) /* 3,1 */
-		values[8] += lambda[0] * (x[0] * x[1]) /* 3,2 */
-
-		values[0] += lambda[1] * 2 /* 0,0 */
-
-		values[2] += lambda[1] * 2 /* 1,1 */
-
-		values[5] += lambda[1] * 2 /* 2,2 */
-
-		values[9] += lambda[1] * 2 /* 3,3 */
+		for i := 0; i < len(matrix); i++ {
+			values[i] = matrix[i]
+		}
 	}
+
 	return true
 }
 
@@ -138,11 +258,11 @@ func TestVersion(t *testing.T) {
 		Constraints:            [2][]float32{g_L, g_U},
 		NumConstraintJacobian:  nele_jac,
 		NumHessianOfLagrangian: nele_hess,
-		Eval:                   p.eval_f,
-		EvalGrad:               p.eval_grad_f,
-		EvalG:                  p.eval_g,
-		EvalJacG:               p.eval_jac_g,
-		EvalH:                  p.eval_h,
+		Eval:                   p.evalF,
+		EvalGrad:               p.evalGradF,
+		EvalG:                  p.evalG,
+		EvalJacG:               p.evalJacG,
+		EvalH:                  p.evalH,
 	}
 
 	problem, err := NewProblem(opt)
@@ -154,8 +274,6 @@ func TestVersion(t *testing.T) {
 	problem.AddStrOption("mu_strategy", "adaptive")
 
 	p.problem = problem
-	p.g_offset[0] = 0.
-	p.g_offset[1] = 0.
 
 	x := make([]float32, n)
 	x[0] = 1.0
@@ -176,7 +294,6 @@ func TestVersion(t *testing.T) {
 
 	fmt.Println(x)
 
-	p.g_offset[0] = 0.2
 	problem.AddStrOption("warm_start_init_point", "yes")
 	problem.AddNumOption("bound_push", 1e-5)
 	problem.AddNumOption("bound_frac", 1e-5)
@@ -185,4 +302,6 @@ func TestVersion(t *testing.T) {
 	if status == nil {
 
 	}
+
+	fmt.Println(x)
 }

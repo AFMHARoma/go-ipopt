@@ -86,11 +86,11 @@ const (
 	IPOPT_INTERNAL_ERROR                     = int(C.internal_error)
 )
 
-type EvalFunc func(x []float32, newX bool, objValue []float32) bool
-type EvalGradFunc func(x []float32, newX bool, grad []float32) bool
-type EvalGFunc func(x []float32, newX bool, m int, g []float32) bool
-type EvalJacGFunc func(x []float32, newX bool, m int, jac [2][]int32, values []float32) bool
-type EvalHFunc func(x []float32, newX bool, objFactor float32, m int, lambda []float32, newLambda bool, hess [2][]int32, values []float32) bool
+type EvalFunc func(x []float64, newX bool, objValue *float64) bool
+type EvalGradFunc func(x []float64, newX bool, grad []float64) bool
+type EvalGFunc func(x []float64, newX bool, m int, g []float64) bool
+type EvalJacGFunc func(x []float64, newX bool, m int, jac [2][]int32, values []float64) bool
+type EvalHFunc func(x []float64, newX bool, objFactor float64, m int, lambda []float64, newLambda bool, hess [2][]int32, values []float64) bool
 
 type ProblemOptions struct {
 	Variables              [2][]float32
