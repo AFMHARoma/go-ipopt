@@ -1,6 +1,9 @@
 package ipopt
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 type MyProblem struct {
 	g_offset [2]float32
@@ -166,17 +169,19 @@ func TestVersion(t *testing.T) {
 
 	objVal := []float32{0}
 
-	objVal, status := p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U)
-
+	objVal, status := p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U, true)
 	if status == nil {
 
 	}
+
+	fmt.Println(x)
+
 	p.g_offset[0] = 0.2
 	problem.AddStrOption("warm_start_init_point", "yes")
 	problem.AddNumOption("bound_push", 1e-5)
 	problem.AddNumOption("bound_frac", 1e-5)
 
-	objVal, status = p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U)
+	objVal, status = p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U, true)
 	if status == nil {
 
 	}
