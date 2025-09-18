@@ -60,8 +60,10 @@ bool ipopt_eval_h_func_go(int n, float *x, bool new_x, float obj_factor, int m,
 import "C"
 import (
 	"errors"
-	_ "github.com/afmharoma/go-ipopt/lib"
 	"unsafe"
+
+	_ "github.com/afmharoma/go-ipopt/lib/darwin_arm"
+	_ "github.com/afmharoma/go-ipopt/lib/linux"
 )
 
 const (
