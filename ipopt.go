@@ -170,6 +170,19 @@ func NewProblem(opt ProblemOptions) (*Problem, error) {
 	return g, nil
 }
 
+func (p *Problem) RenewConstraints(x_L, x_U, g_L, g_U []float64) bool {
+	var ok C.bool
+	xL := toCFloatArray(x_L)
+	xU := toCFloatArray(x_U)
+
+	gl := toCFloatArray(g_L)
+	gu := toCFloatArray(g_U)
+
+	ok = C.ipopt_problem_renew_constraints(p.Inner.problem, C.int(len(x_L)), &xL[0], &xU[0], C.int(len(g_L)), &gl[0], &gu[0])
+
+	return bool(ok)
+}
+
 func (p *Problem) AddStrOption(param string, value string) {
 	cparam := C.CString(param)
 	cvalue := C.CString(value)

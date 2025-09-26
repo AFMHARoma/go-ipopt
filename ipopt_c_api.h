@@ -66,8 +66,15 @@ IPOPTCAPICALL void ipopt_problem_add_num_option(ipopt_problem_t *p,
                                                 const char *param, float value);
 IPOPTCAPICALL void ipopt_problem_set_problem_scaling(ipopt_problem_t *p,
                                                      float obj_scaling,
-                                                     float *x_scaling,
-                                                     float *g_scaling);
+                                                     double *x_scaling,
+                                                     double *g_scaling);
+IPOPTCAPICALL bool ipopt_problem_renew_constraints(ipopt_problem_t *p,
+                                                     int n,
+                                                     double *xL,
+                                                     double *xU,
+                                                     int m,
+                                                     double *gl,
+                                                     double *gu);
 IPOPTCAPICALL enum ipopt_return_status
 ipopt_problem_solve(ipopt_problem_t *p, double *x, double *g, double *obj_val,
                     double *mult_g, double *mult_x_L, double *mult_x_U,

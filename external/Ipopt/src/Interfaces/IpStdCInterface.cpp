@@ -121,6 +121,45 @@ void FreeIpoptProblem(
    delete ipopt_problem;
 }
 
+bool RenewConstraints(
+   IpoptProblem    ipopt_problem,
+   ipindex         n,
+   ipnumber*       x_L,
+   ipnumber*       x_U,
+   ipindex         m,
+   ipnumber*       g_L,
+   ipnumber*       g_U
+)
+{
+    if (!ipopt_problem || !x_L || !x_U || !g_L || !g_U) {
+        return false;
+    }
+
+    // Освобождаем старую память
+    if (ipopt_problem->x_L) delete[] ipopt_problem->x_L;
+    if (ipopt_problem->x_U) delete[] ipopt_problem->x_U;
+    if (ipopt_problem->g_L) delete[] ipopt_problem->g_L;
+    if (ipopt_problem->g_U) delete[] ipopt_problem->g_U;
+
+    // Выделяем новую память
+    ipopt_problem->x_L = new ipnumber[n];
+    ipopt_problem->x_U = new ipnumber[n];
+    ipopt_problem->g_L = new ipnumber[m];
+    ipopt_problem->g_U = new ipnumber[m];
+
+    // Копируем данные используя IpBlasCopy (предпочтительно для Ipopt)
+    Ipopt::IpBlasCopy(n, x_L, 1, ipopt_problem->x_L, 1);
+    Ipopt::IpBlasCopy(n, x_U, 1, ipopt_problem->x_U, 1);
+    Ipopt::IpBlasCopy(m, g_L, 1, ipopt_problem->g_L, 1);
+    Ipopt::IpBlasCopy(m, g_U, 1, ipopt_problem->g_U, 1);
+
+    // Обновляем размерности
+    ipopt_problem->n = n;
+    ipopt_problem->m = m;
+
+    return true;
+}
+
 bool AddIpoptStrOption(
    IpoptProblem ipopt_problem,
    char*        keyword,

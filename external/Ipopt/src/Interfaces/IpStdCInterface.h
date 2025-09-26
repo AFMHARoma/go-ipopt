@@ -269,6 +269,16 @@ IPOPTLIB_EXPORT bool IPOPT_CALLCONV AddIpoptIntOption(
    ipindex      val
 );
 
+IPOPTLIB_EXPORT bool IPOPT_CALLCONV RenewConstraints(
+   IpoptProblem    ipopt_problem,
+   ipindex         n,
+   ipnumber*       x_L,
+   ipnumber*       x_U,
+   ipindex         m,
+   ipnumber*       g_L,
+   ipnumber*       g_U
+);
+
 /** Function for opening an output file for a given name with given printlevel.
  *
  * @return false, if there was a problem opening the file.

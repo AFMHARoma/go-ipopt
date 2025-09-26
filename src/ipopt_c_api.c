@@ -26,6 +26,13 @@ void ipopt_problem_add_str_option(ipopt_problem_t *p, const char *param,
   }
 }
 
+bool ipopt_problem_renew_constraints(ipopt_problem_t *p, int n, double *xL, double *xU, int m, double *gl, double *gu) {
+  if (p->problem != NULL) {
+    return RenewConstraints(p->problem, n, xL, xU, m, gl, gu);
+  }
+  return false;
+}
+
 void ipopt_problem_add_int_option(ipopt_problem_t *p, const char *param,
                                   int value) {
   if (p->problem != NULL) {
@@ -41,7 +48,7 @@ void ipopt_problem_add_num_option(ipopt_problem_t *p, const char *param,
 }
 
 void ipopt_problem_set_problem_scaling(ipopt_problem_t *p, float obj_scaling,
-                                       float *x_scaling, float *g_scaling) {
+                                       double *x_scaling, double *g_scaling) {
   if (p->problem != NULL) {
     SetIpoptProblemScaling(p->problem, obj_scaling, x_scaling, g_scaling);
   }

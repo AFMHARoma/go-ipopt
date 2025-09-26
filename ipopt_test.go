@@ -285,21 +285,13 @@ func TestVersion(t *testing.T) {
 
 	objVal := []float64{0}
 
-	objVal, status := p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U, true)
+	objVal, status := p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U, false)
 	if status == nil {
 
 	}
 
 	fmt.Println(x)
 
-	problem.AddStrOption("warm_start_init_point", "yes")
-	problem.AddNumOption("bound_push", 1e-5)
-	problem.AddNumOption("bound_frac", 1e-5)
-
-	objVal, status = p.problem.Solve(x, nil, objVal, mult_g, mult_x_L, mult_x_U, true)
-	if status == nil {
-
-	}
-
-	fmt.Println(x)
+	ok := problem.RenewConstraints(x_L, x_U, g_L, g_U)
+	fmt.Println(ok)
 }
