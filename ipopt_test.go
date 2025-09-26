@@ -292,6 +292,6 @@ func TestVersion(t *testing.T) {
 
 	fmt.Println(x)
 
-	ok := problem.RenewConstraints(x_L, x_U, g_L, g_U)
+	ok := problem.Refresh(opt)
 	fmt.Println(ok)
 }

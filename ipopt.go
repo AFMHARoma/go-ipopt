@@ -170,15 +170,26 @@ func NewProblem(opt ProblemOptions) (*Problem, error) {
 	return g, nil
 }
 
-func (p *Problem) RenewConstraints(x_L, x_U, g_L, g_U []float64) bool {
+func (p *Problem) Refresh(opts ProblemOptions) bool {
 	var ok C.bool
-	xL := toCFloatArray(x_L)
-	xU := toCFloatArray(x_U)
+	xL := toCFloatArray(opts.Variables[0])
+	xU := toCFloatArray(opts.Variables[1])
 
-	gl := toCFloatArray(g_L)
-	gu := toCFloatArray(g_U)
+	gL := toCFloatArray(opts.Constraints[0])
+	gU := toCFloatArray(opts.Constraints[1])
 
-	ok = C.ipopt_problem_renew_constraints(p.Inner.problem, C.int(len(x_L)), &xL[0], &xU[0], C.int(len(g_L)), &gl[0], &gu[0])
+	cb := &problemCallback{
+		eval:     opts.Eval,
+		evalGrad: opts.EvalGrad,
+		evalG:    opts.EvalG,
+		evalJacG: opts.EvalJacG,
+		evalH:    opts.EvalH,
+	}
+
+	p.opt = &opts
+	p.Inner.cb = cb
+
+	ok = C.ipopt_problem_renew_constraints(p.Inner.problem, C.int(len(xL)), &xL[0], &xU[0], C.int(len(gL)), &gL[0], &gU[0])
 
 	return bool(ok)
 }
