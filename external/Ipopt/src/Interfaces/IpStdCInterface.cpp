@@ -135,27 +135,27 @@ bool RenewConstraints(
         return false;
     }
 
-    // Освобождаем старую память
-    if (ipopt_problem->x_L) delete[] ipopt_problem->x_L;
-    if (ipopt_problem->x_U) delete[] ipopt_problem->x_U;
-    if (ipopt_problem->g_L) delete[] ipopt_problem->g_L;
-    if (ipopt_problem->g_U) delete[] ipopt_problem->g_U;
+    // Проверяем соответствие размеров
+    if (ipopt_problem->n != n || ipopt_problem->m != m) {
+        return false;
+    }
 
-    // Выделяем новую память
-    ipopt_problem->x_L = new ipnumber[n];
-    ipopt_problem->x_U = new ipnumber[n];
-    ipopt_problem->g_L = new ipnumber[m];
-    ipopt_problem->g_U = new ipnumber[m];
+    // Проверяем существование массивов
+    if (!ipopt_problem->x_L || !ipopt_problem->x_U ||
+        !ipopt_problem->g_L || !ipopt_problem->g_U) {
+        return false;
+    }
 
-    // Копируем данные используя IpBlasCopy (предпочтительно для Ipopt)
-    Ipopt::IpBlasCopy(n, x_L, 1, ipopt_problem->x_L, 1);
-    Ipopt::IpBlasCopy(n, x_U, 1, ipopt_problem->x_U, 1);
-    Ipopt::IpBlasCopy(m, g_L, 1, ipopt_problem->g_L, 1);
-    Ipopt::IpBlasCopy(m, g_U, 1, ipopt_problem->g_U, 1);
+    // Копируем данные через простой цикл (без IpBlas)
+    for (ipindex i = 0; i < n; i++) {
+        ipopt_problem->x_L[i] = x_L[i];
+        ipopt_problem->x_U[i] = x_U[i];
+    }
 
-    // Обновляем размерности
-    ipopt_problem->n = n;
-    ipopt_problem->m = m;
+    for (ipindex i = 0; i < m; i++) {
+        ipopt_problem->g_L[i] = g_L[i];
+        ipopt_problem->g_U[i] = g_U[i];
+    }
 
     return true;
 }
