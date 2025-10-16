@@ -60,6 +60,7 @@ bool ipopt_eval_h_func_go(int n, float *x, bool new_x, float obj_factor, int m,
 import "C"
 import (
 	"errors"
+	"fmt"
 	"unsafe"
 
 	_ "github.com/afmharoma/go-ipopt/lib/darwin_arm"
@@ -145,15 +146,50 @@ func NewProblem(opt ProblemOptions) (*Problem, error) {
 	xL := toCFloatArray(opt.Variables[0])
 	xU := toCFloatArray(opt.Variables[1])
 
-	gl := toCFloatArray(opt.Constraints[0])
-	gu := toCFloatArray(opt.Constraints[1])
-
 	n := len(opt.Variables[0])
+	m := len(opt.Constraints[0])
 
-	problem = C.ipopt_problem_create(C.int(n), &xL[0], &xU[0],
-		C.int(len(opt.Constraints[0])), &gl[0], &gu[0],
-		C.int(opt.NumConstraintJacobian), C.int(opt.NumHessianOfLagrangian),
-		eval_f, eval_grad_f, eval_g, eval_jac_g, eval_h)
+	// Для ограничений: создаем массивы только если есть ограничения
+	var glPtr, guPtr *C.double
+	var gl, gu []C.double
+
+	if m > 0 {
+		gl = toCFloatArray(opt.Constraints[0])
+		gu = toCFloatArray(opt.Constraints[1])
+		glPtr = &gl[0]
+		guPtr = &gu[0]
+	} else {
+		glPtr = nil
+		guPtr = nil
+	}
+
+	// Убедимся, что для задач без ограничений корректно указаны размеры
+	nele_jac := opt.NumConstraintJacobian
+	nele_hess := opt.NumHessianOfLagrangian
+
+	// Если нет ограничений, то якобиан и гессиан должны быть 0
+	if m == 0 {
+		if nele_jac != 0 {
+			fmt.Printf("Warning: NumConstraintJacobian should be 0 when there are no constraints\n")
+			nele_jac = 0
+		}
+		// Для гессиана можно оставить как есть, т.к. он может использоваться для целевой функции
+	}
+
+	problem = C.ipopt_problem_create(
+		C.int(n),
+		&xL[0],
+		&xU[0],
+		C.int(m), // количество ограничений (может быть 0)
+		glPtr,    // может быть nil если m == 0
+		guPtr,    // может быть nil если m == 0
+		C.int(nele_jac),
+		C.int(nele_hess),
+		eval_f,
+		eval_grad_f,
+		eval_g,
+		eval_jac_g,
+		eval_h)
 
 	cb := &problemCallback{
 		eval:     opt.Eval,
@@ -175,8 +211,22 @@ func (p *Problem) Refresh(opts ProblemOptions) bool {
 	xL := toCFloatArray(opts.Variables[0])
 	xU := toCFloatArray(opts.Variables[1])
 
-	gL := toCFloatArray(opts.Constraints[0])
-	gU := toCFloatArray(opts.Constraints[1])
+	n := len(xL)
+	m := len(opts.Constraints[0])
+
+	// Для границ ограничений: создаем массивы только если есть ограничения
+	var gLPtr, gUPtr *C.double
+	var gL, gU []C.double
+
+	if m > 0 {
+		gL = toCFloatArray(opts.Constraints[0])
+		gU = toCFloatArray(opts.Constraints[1])
+		gLPtr = &gL[0]
+		gUPtr = &gU[0]
+	} else {
+		gLPtr = nil
+		gUPtr = nil
+	}
 
 	cb := &problemCallback{
 		eval:     opts.Eval,
@@ -189,7 +239,14 @@ func (p *Problem) Refresh(opts ProblemOptions) bool {
 	p.opt = &opts
 	p.Inner.cb = cb
 
-	ok = C.ipopt_problem_renew_constraints(p.Inner.problem, C.int(len(xL)), &xL[0], &xU[0], C.int(len(gL)), &gL[0], &gU[0])
+	ok = C.ipopt_problem_renew_constraints(
+		p.Inner.problem,
+		C.int(n),
+		&xL[0],
+		&xU[0],
+		C.int(m),
+		gLPtr, // может быть nil если m == 0
+		gUPtr) // может быть nil если m == 0
 
 	return bool(ok)
 }

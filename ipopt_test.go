@@ -195,38 +195,6 @@ func (p *MyProblem) evalJacG(x []float64, _ bool, _ int, jac [2][]int32, values 
 	return true
 }
 
-// evalH реализует интерфейс IPOPT: гессиан лагранжиана (структура и значения).
-func (p *MyProblem) evalH(
-	x []float64,
-	_ bool,
-	objFactor float64,
-	_ int,
-	lambda []float64,
-	_ bool,
-	hess [2][]int32,
-	values []float64,
-) bool {
-	if values == nil {
-		idx := 0
-		for row := 0; row < 4; row++ {
-			for col := 0; col <= row; col++ {
-				hess[0][idx] = int32(row)
-				hess[1][idx] = int32(col)
-				idx++
-			}
-		}
-	} else {
-		hess := ComputeLagrangianHessian(p.targetFunc, p.evalGVector, objFactor, lambda, x)
-		matrix := ExtractUpperTriangle(hess)
-
-		for i := 0; i < len(matrix); i++ {
-			values[i] = matrix[i]
-		}
-	}
-
-	return true
-}
-
 func TestVersion(t *testing.T) {
 	n := 4
 	x_L := make([]float64, n)
@@ -260,7 +228,7 @@ func TestVersion(t *testing.T) {
 		EvalGrad:               p.evalGradF,
 		EvalG:                  p.evalG,
 		EvalJacG:               p.evalJacG,
-		EvalH:                  p.evalH,
+		EvalH:                  nil,
 	}
 
 	problem, err := NewProblem(opt)
@@ -270,6 +238,7 @@ func TestVersion(t *testing.T) {
 
 	problem.AddNumOption("tol", 3.82e-6)
 	problem.AddStrOption("mu_strategy", "adaptive")
+	problem.AddStrOption("hessian_approximation", "limited-memory")
 
 	p.problem = problem
 
