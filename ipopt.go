@@ -228,7 +228,15 @@ func (p *Problem) Solve(x []float64, g []float64, objVal []float64, multG []floa
 	}
 
 	cobjVal := toCFloatArray(objVal)
-	cmultG := toCFloatArray(multG)
+
+	var cmultG []C.double
+	var cmultGPtr *C.double
+	if len(multG) > 0 {
+		cmultG = toCFloatArray(multG)
+		cmultGPtr = (*C.double)(&cmultG[0])
+	} else {
+		cmultGPtr = nil
+	}
 
 	cmultxL := toCFloatArray(multxL)
 	cmultxU := toCFloatArray(multxU)
@@ -239,12 +247,15 @@ func (p *Problem) Solve(x []float64, g []float64, objVal []float64, multG []floa
 		ccX,
 		ccg,
 		(*C.double)(&cobjVal[0]),
-		(*C.double)(&cmultG[0]),
+		cmultGPtr, // Используем указатель или nil
 		(*C.double)(&cmultxL[0]),
 		(*C.double)(&cmultxU[0]),
 		userData))
 
-	toCopyFloatArray(cmultG, multG)
+	// Копируем обратно только если есть данные
+	if len(multG) > 0 {
+		toCopyFloatArray(cmultG, multG)
+	}
 	toCopyFloatArray(cmultxL, multxL)
 	toCopyFloatArray(cmultxU, multxU)
 	toCopyFloatArray(cobjVal, objVal)
