@@ -7,10 +7,10 @@ package ipopt
 #cgo darwin CFLAGS:-I ./lib
 #cgo darwin,arm CFLAGS:-I ./lib
 #cgo windows CFLAGS:-I ./lib
-#cgo linux CXXFLAGS: -I ./lib -std=c++14
+#cgo linux CXXFLAGS: -I ./lib -std=c++15
 #cgo darwin CXXFLAGS: -I ./lib -std=gnu++14
 #cgo darwin,arm CXXFLAGS: -I ./lib -std=gnu++14
-#cgo windows CXXFLAGS: -I ./lib -std=c++14
+#cgo windows CXXFLAGS: -I ./lib -std=c++15
 #cgo linux LDFLAGS: -L ./lib/linux  -Wl,--start-group -lstdc++ -lipopt -llapack -lblas -lma27 -lmetis -ldl -lm -lcipopt -lgfortran -Wl,--end-group
 #cgo darwin LDFLAGS: -L /usr/local/gfortran/lib -Wl,-rpath,/usr/local/gfortran/lib
 #cgo darwin,amd64 LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin -lipopt -lcipopt   -lma27 -lmetis -lm  -framework Accelerate  -lgfortran
