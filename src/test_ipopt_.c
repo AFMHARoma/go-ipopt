@@ -18,7 +18,7 @@ struct MyUserData {
 };
 
 /* Callback Implementations */
-static bool eval_f(int n, float *x, bool new_x, float *obj_value,
+static bool eval_f(int n, double *x, bool new_x, double *obj_value,
                    void *user_data) {
   assert(n == 4);
   (void)n;
@@ -31,7 +31,7 @@ static bool eval_f(int n, float *x, bool new_x, float *obj_value,
   return true;
 }
 
-static bool eval_grad_f(int n, float *x, bool new_x, float *grad_f,
+static bool eval_grad_f(int n, double *x, bool new_x, double *grad_f,
                         void *user_data) {
   assert(n == 4);
   (void)n;
@@ -47,7 +47,7 @@ static bool eval_grad_f(int n, float *x, bool new_x, float *grad_f,
   return true;
 }
 
-static bool eval_g(int n, float *x, bool new_x, int m, float *g,
+static bool eval_g(int n, double *x, bool new_x, int m, double *g,
                    void *user_data) {
   struct MyUserData *my_data = user_data;
 
@@ -65,8 +65,8 @@ static bool eval_g(int n, float *x, bool new_x, int m, float *g,
   return true;
 }
 
-static bool eval_jac_g(int n, float *x, bool new_x, int m, int nele_jac,
-                       int *iRow, int *jCol, float *values, void *user_data) {
+static bool eval_jac_g(int n, double *x, bool new_x, int m, int nele_jac,
+                       int *iRow, int *jCol, double *values, void *user_data) {
   (void)n;
   (void)new_x;
   (void)m;
@@ -110,9 +110,9 @@ static bool eval_jac_g(int n, float *x, bool new_x, int m, int nele_jac,
   return true;
 }
 
-static bool eval_h(int n, float *x, bool new_x, float obj_factor, int m,
-                   float *lambda, bool new_lambda, int nele_hess, int *iRow,
-                   int *jCol, float *values, void *user_data) {
+static bool eval_h(int n, double *x, bool new_x, double obj_factor, int m,
+                   double *lambda, bool new_lambda, int nele_hess, int *iRow,
+                   int *jCol, double *values, void *user_data) {
   (void)n;
   (void)new_x;
   (void)m;
@@ -190,24 +190,24 @@ int main() {
   int nele_hess;   /* number of nonzeros in the Hessian of the Lagrangian (lower
                       or upper triangular part only) */
   int index_style; /* indexing style for matrices */
-  float *x_L = NULL;               /* lower bounds on x */
-  float *x_U = NULL;               /* upper bounds on x */
-  float *g_L = NULL;               /* lower bounds on g */
-  float *g_U = NULL;               /* upper bounds on g */
+  double *x_L = NULL;               /* lower bounds on x */
+  double *x_U = NULL;               /* upper bounds on x */
+  double *g_L = NULL;               /* lower bounds on g */
+  double *g_U = NULL;               /* upper bounds on g */
   ipopt_problem_t *nlp = NULL;     /* IpoptProblem */
   enum ipopt_return_status status; /* Solve return code */
-  float *x = NULL;                 /* starting point and solution vector */
-  float *mult_g = NULL;            /* constraint multipliers at the solution */
-  float *mult_x_L = NULL;          /* lower bound multipliers at the solution */
-  float *mult_x_U = NULL;          /* upper bound multipliers at the solution */
-  float obj;                       /* objective value */
+  double *x = NULL;                 /* starting point and solution vector */
+  double *mult_g = NULL;            /* constraint multipliers at the solution */
+  double *mult_x_L = NULL;          /* lower bound multipliers at the solution */
+  double *mult_x_U = NULL;          /* upper bound multipliers at the solution */
+  double obj;                       /* objective value */
   struct MyUserData user_data; /* our user data for the function evaluations */
   int i;                       /* generic counter */
 
   /* set the number of variables and allocate space for the bounds */
   n = 4;
-  x_L = (float *)malloc(sizeof(float) * n);
-  x_U = (float *)malloc(sizeof(float) * n);
+  x_L = (double *)malloc(sizeof(double) * n);
+  x_U = (double *)malloc(sizeof(double) * n);
   /* set the values for the variable bounds */
   for (i = 0; i < n; i++) {
     x_L[i] = 1.0;
@@ -216,8 +216,8 @@ int main() {
 
   /* set the number of constraints and allocate space for the bounds */
   m = 2;
-  g_L = (float *)malloc(sizeof(float) * m);
-  g_U = (float *)malloc(sizeof(float) * m);
+  g_L = (double *)malloc(sizeof(double) * m);
+  g_U = (double *)malloc(sizeof(double) * m);
   /* set the values of the constraint bounds */
   g_L[0] = 25;
   g_U[0] = 2e19;
@@ -249,16 +249,16 @@ int main() {
   ipopt_problem_add_str_option(nlp, "output_file", "ipopt.out");
 
   /* allocate space for the initial point and set the values */
-  x = (float *)malloc(sizeof(float) * n);
+  x = (double *)malloc(sizeof(double) * n);
   x[0] = 1.0;
   x[1] = 5.0;
   x[2] = 5.0;
   x[3] = 1.0;
 
   /* allocate space to store the bound multipliers at the solution */
-  mult_g = (float *)malloc(sizeof(float) * m);
-  mult_x_L = (float *)malloc(sizeof(float) * n);
-  mult_x_U = (float *)malloc(sizeof(float) * n);
+  mult_g = (double *)malloc(sizeof(double) * m);
+  mult_x_L = (double *)malloc(sizeof(double) * n);
+  mult_x_U = (double *)malloc(sizeof(double) * n);
 
   /* Initialize the user data */
   user_data.g_offset[0] = 0.;
