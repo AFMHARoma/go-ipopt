@@ -7,7 +7,7 @@ package ipopt
 #cgo darwin CFLAGS:-I ./lib
 #cgo darwin,arm CFLAGS:-I ./lib
 #cgo windows CFLAGS:-I ./lib
-#cgo linux CXXFLAGS: -I ./lib -std=c++15
+#cgo linux CXXFLAGS: -I ./lib -std=c++14
 #cgo darwin CXXFLAGS: -I ./lib -std=gnu++14
 #cgo darwin,arm CXXFLAGS: -I ./lib -std=gnu++14
 #cgo windows CXXFLAGS: -I ./lib -std=c++15
