@@ -11,9 +11,9 @@ package ipopt
 #cgo darwin CXXFLAGS: -I ./lib -std=gnu++14
 #cgo darwin,arm CXXFLAGS: -I ./lib -std=gnu++14
 #cgo windows CXXFLAGS: -I ./lib -std=c++15
-#cgo linux LDFLAGS: -L ./lib/linux -lcipopt -lipopt -lma27 -lmetis -llapack -lopenblas -lgfortran -lstdc++ -lm -ldl -fopenmp
+#cgo linux LDFLAGS: -L ./lib/linux -lcipopt -lipopt -lma27 -lmetis -llapack -lblas -lgfortran -lstdc++ -lm -ldl -fopenmp
 #cgo darwin LDFLAGS: -L /usr/local/gfortran/lib -Wl,-rpath,/usr/local/gfortran/lib
-#cgo darwin,amd64 LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin -lipopt -lcipopt   -lma27 -lmetis -lm  -framework Accelerate  -lgfortran
+#cgo darwin,amd64 LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin -lipopt -lcipopt -lma27 -lmetis -lm -framework Accelerate -lgfortran
 #cgo darwin,arm64 LDFLAGS: -L /usr/lib -lc++ -L ./lib/darwin_arm  -lipopt  -lma27 -lmetis -lcipopt -lm  -framework Accelerate  -lgfortran
 #cgo windows LDFLAGS: -L ./lib/windows -lipopt -llapack -lblas -lma27 -lmetis -lcipopt -fPIC
 
